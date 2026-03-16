@@ -1,39 +1,46 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="_layout">
-<head><meta charset="UTF-8"></head>
+<html lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{../_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Product List</title>
+</head>
 <body>
-<div class="container body-content">
-    <h1 class="text-danger">Bootstrap Test</h1>
-<button class="btn btn-primary">Test</button><button type="button" class="btn">Basic</button>
-<button type="button" class="btn btn-default">Default</button>
-    <a th:href="@{/products/create}" class="btn btn-primary">Create New Product</a>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th scope="col">Id</th><th scope="col">Name</th><th scope="col">Image</th><th scope="col">Price</th>
-            <th scope="col">Category Name</th><th scope="col"></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="product : ${products}">
-            <th scope="row" th:text="${product.id}"></th>
-            <td th:text="${product.name}"></td>
-            <td><img height="120" width="150" th:src="${product.image}" alt="Product Image"></td>
-            <td th:text="${product.price}"></td>
-            <td th:text="${product.category != null} ? ${product.category.name} : ''"></td>
-            <td>
-                <form th:action="@{/products/edit/{id}(id=${product.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-secondary">Edit</button>
-                </form>
-                <form th:action="@{/products/delete/{id}(id=${product.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<div layout:fragment="content">
+    <div class="container body-content">
+        <a th:href="@{/products/create}" class="btn btn-primary mb-3">Create New Product</a>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Name</th>
+                <th scope="col">Image</th>
+                <th scope="col">Price</th>
+                <th scope="col">Category Name</th>
+                <th scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${products}">
+                <th scope="row" th:text="${product.id}"></th>
+                <td th:text="${product.name}"></td>
+                <td><img height="120" width="150" th:src="${product.image}" alt="Product Image" class="img-thumbnail"></td>
+                <td th:text="${product.price}"></td>
+                <td th:text="${product.category != null} ? ${product.category.name} : ''"></td>
+                <td>
+                    <form th:action="@{/products/edit/{id}(id=${product.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-secondary btn-sm">Edit</button>
+                    </form>
+                    <form th:action="@{/products/delete/{id}(id=${product.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
 </html>
