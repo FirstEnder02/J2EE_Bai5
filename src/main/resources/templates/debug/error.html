@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Debug Error</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .meta { margin-bottom: 12px; }
+    pre { background:#f6f6f6; padding:12px; border:1px solid #ddd; overflow:auto; max-height:60vh; }
+    .warn { color:#b33; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h2 class="warn">Application Error (Debug)</h2>
+  <div class="meta"><strong>Time:</strong> <span th:text="${timestamp}"/></div>
+  <div class="meta"><strong>Path:</strong> <span th:text="${path}"/></div>
+  <div class="meta"><strong>Exception:</strong> <span th:text="${exception}"/></div>
+  <div class="meta"><strong>Message:</strong> <span th:text="${message}"/></div>
+
+  <div th:if="${isDebug}">
+    <h3>Stack trace</h3>
+    <pre th:text="${stackTrace}"></pre>
+  </div>
+  <div th:unless="${isDebug}">
+    <p>Stack trace is hidden. Activate the <strong>dev</strong> profile to see details.</p>
+  </div>
+
+  <hr/>
+  <p><a th:href="@{/products}">Back to products list</a> | <a th:href="@{/products/debug/ping}">Ping</a></p>
+</body>
+</html>
