@@ -3,8 +3,11 @@ package J2EE_Bai5.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 
 import J2EE_Bai5.models.*;
 import J2EE_Bai5.service.*;
@@ -27,11 +30,18 @@ public class ProductController {
         return "product/product";
     }
 
-    @GetMapping("/create")
-    public String showAddForm(Model model) {
-        model.addAttribute("product", new Product());
-        model.addAttribute("categories", categoryService.getAllCategories());
-        return "product/create";
+    @PostMapping("/create")
+    public String create(@ModelAttribute Product product, 
+                        @RequestParam("imageProduct") MultipartFile file) throws IOException {
+        if (!file.isEmpty()) {
+            File uploadFolder = new File("target/classes/static/images");
+            uploadFolder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            file.transferTo(new File(uploadFolder, fileName));
+            product.setImage(fileName);
+        }
+        productService.saveProduct(product);
+        return "redirect:/product";
     }
 
     @PostMapping("/save")
@@ -41,21 +51,29 @@ public class ProductController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable("id") Integer id, Model model) {
-        Product product = productService.getProductById(id);
-        if (product == null) {
-            return "debug/error";
-        }
-        model.addAttribute("product", product);
-        model.addAttribute("categories", categoryService.getAllCategories());
+    public String showEdit(@PathVariable int id, Model model) {
+        model.addAttribute("product", productService.getProductById(id));
         return "product/edit";
     }
-    
+
     @PostMapping("/edit")
-    public String updateProduct(@ModelAttribute Product product,
-                                @RequestParam(value = "imageProduct", required = false) MultipartFile image) {
-        productService.updateProduct(product);
-        return "redirect:/products";
+    public String update(@ModelAttribute Product product, 
+                        @RequestParam("imageProduct") MultipartFile file) throws IOException {
+        
+        Product existing = productService.getProductById(product.getId());
+        
+        if (!file.isEmpty()) {
+            File uploadFolder = new File("target/classes/static/images");
+            uploadFolder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            file.transferTo(new File(uploadFolder, fileName));
+            product.setImage(fileName);
+        } else {
+            product.setImage(existing.getImage());
+        }
+        
+        productService.saveProduct(product);
+        return "redirect:/product";
     }
 
     @GetMapping("/delete/{id}")
