@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="_Layout">
+      layout:decorate="_layout">
 <head><meta charset="UTF-8"></head>
 <body>
 <div class="container body-content">
+    <h1 class="text-danger">Bootstrap Test</h1>
+<button class="btn btn-primary">Test</button><button type="button" class="btn">Basic</button>
+<button type="button" class="btn btn-default">Default</button>
     <a th:href="@{/products/create}" class="btn btn-primary">Create New Product</a>
     <table class="table table-striped">
         <thead>
