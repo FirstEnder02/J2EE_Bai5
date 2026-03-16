@@ -3,6 +3,7 @@ package J2EE_Bai5.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.ui.Model;
 
 import J2EE_Bai5.models.*;
@@ -48,6 +49,13 @@ public class ProductController {
         model.addAttribute("product", product);
         model.addAttribute("categories", categoryService.getAllCategories());
         return "product/edit";
+    }
+    
+    @PostMapping("/edit")
+    public String updateProduct(@ModelAttribute Product product,
+                                @RequestParam(value = "imageProduct", required = false) MultipartFile image) {
+        productService.updateProduct(product);
+        return "redirect:/products";
     }
 
     @GetMapping("/delete/{id}")
