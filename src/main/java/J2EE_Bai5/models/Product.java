@@ -13,7 +13,7 @@ import org.hibernate.validator.constraints.Length;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @NotBlank(message = "Tên sản phẩm không được để trống")
     @Column(nullable = false, length = 255)

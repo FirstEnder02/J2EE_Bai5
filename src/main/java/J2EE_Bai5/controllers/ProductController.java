@@ -23,7 +23,7 @@ public class ProductController {
     public String listProducts(Model model) {
         List<Product> productList = productService.getAllProducts();
         model.addAttribute("products", productList);
-        return "product/products";
+        return "product/product";
     }
 
     @GetMapping("/create")
@@ -43,7 +43,7 @@ public class ProductController {
     public String showEditForm(@PathVariable("id") Integer id, Model model) {
         Product product = productService.getProductById(id);
         if (product == null) {
-            return "error/404";
+            return "debug/error";
         }
         model.addAttribute("product", product);
         model.addAttribute("categories", categoryService.getAllCategories());
