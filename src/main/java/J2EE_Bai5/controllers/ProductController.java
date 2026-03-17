@@ -49,11 +49,12 @@ public class ProductController {
     @GetMapping("/create")
 public String showCreateForm(Model model) {
     Product p = new Product();
-    p.setCategory(new Category());          // <-- ensure nested object exists
+    p.setCategory(new Category());
     model.addAttribute("product", p);
     model.addAttribute("categories", categoryService.getAllCategories());
     return "product/create";
 }
+
 
     @PostMapping("/save")
     public String saveProduct(@Valid @ModelAttribute("product") Product product,
@@ -68,10 +69,12 @@ public String showCreateForm(Model model) {
     }
 
     @GetMapping("/edit/{id}")
-    public String showEdit(@PathVariable int id, Model model) {
-        model.addAttribute("product", productService.getProductById(id));
-        return "product/edit";
-    }
+public String showEdit(@PathVariable int id, Model model) {
+    model.addAttribute("product", productService.getProductById(id));
+    model.addAttribute("categories", categoryService.getAllCategories());
+    return "product/edit";
+}
+
 
     @PostMapping("/edit")
     public String update(@Valid @ModelAttribute Product product,

@@ -1,7 +1,7 @@
 package J2EE_Bai5.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -19,9 +19,9 @@ public class Product {
     private String name;
 
     @NotNull(message = "Giá sản phẩm không được để trống")
-    @Min(value = -1, message = "Giá sản phẩm không được nhỏ hơn -1")
+    @PositiveOrZero(message = "Giá sản phẩm phải lớn hơn hoặc bằng 0")
     @Column(nullable = false)
-    private long price;
+    private Long price;
 
     @Length(min = 0, max = 200, message = "Tên hình ảnh không quá 200 kí tự")
     @Column(length = 200)
