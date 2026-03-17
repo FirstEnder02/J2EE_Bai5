@@ -30,7 +30,7 @@
                 <td th:text="${product.name}"></td>
                 <td><img height="120" width="150" th:src="${product.image}" alt="Product Image" class="img-thumbnail"></td>
                 <td th:text="${product.price}"></td>
-                <td th:text="${product.category != null} ? ${product.category.name} : ''"></td>
+                <td th:text="${product.category != null ? product.category.name : ''}"></td>
                 <td>
                     <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-secondary btn-sm">Edit</a>
                     <form th:action="@{/products/delete/{id}(id=${product.id})}" method="post" style="display:inline;">

@@ -47,11 +47,13 @@ public class ProductController {
     }
 
     @GetMapping("/create")
-        public String showCreateForm(Model model) {
-        model.addAttribute("product", new Product());
-        model.addAttribute("categories", categoryService.getAllCategories());
-        return "product/create";
-    }
+public String showCreateForm(Model model) {
+    Product p = new Product();
+    p.setCategory(new Category());          // <-- ensure nested object exists
+    model.addAttribute("product", p);
+    model.addAttribute("categories", categoryService.getAllCategories());
+    return "product/create";
+}
 
     @PostMapping("/save")
     public String saveProduct(@Valid @ModelAttribute("product") Product product,
