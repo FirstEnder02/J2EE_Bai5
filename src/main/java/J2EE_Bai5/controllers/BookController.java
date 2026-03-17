@@ -15,108 +15,89 @@ import J2EE_Bai5.service.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
+
 @Controller
-@RequestMapping("/Books")
+@RequestMapping("/books")
 public class BookController {
 
     @Autowired
-    private BookService BookService;
+    private BookService bookService;
 
     @Autowired
     private CategoryService categoryService;
 
     @GetMapping
     public String listBooks(Model model) {
-        List<Book> BookList = BookService.getAllBooks();
-        model.addAttribute("Books", BookList);
-        return "Book/Book";
+        List<Book> bookList = bookService.getAllBooks();
+        model.addAttribute("books", bookList);
+        return "book/book";
+    }
+    @GetMapping("/create")
+    public String showCreateForm(Model model) {
+        Book b = new Book();
+        b.setCategory(new Category());
+        model.addAttribute("book", b);
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "book/create";
     }
 
     @PostMapping("/create")
-public String create(@Valid @ModelAttribute("Book") Book Book,
-                     BindingResult bindingResult,
-                     @RequestParam(value = "imageBook", required = false) MultipartFile file,
-                     Model model) throws IOException {
-
-    if (bindingResult.hasErrors()) {
-        model.addAttribute("categories", categoryService.getAllCategories());
-        return "Book/create";
-    }
-
-    if (file != null && !file.isEmpty()) {
-        File uploadFolder = new File("src/main/resources/static/images");
-        uploadFolder.mkdirs();
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        file.transferTo(new File(uploadFolder, fileName));
-        Book.setImage(fileName);
-    }
-
-    BookService.saveBook(Book);
-    return "redirect:/Books";
-}
-
-
-@GetMapping("/create")
-public String showCreateForm(Model model) {
-    Book p = new Book();
-    p.setCategory(new Category());
-    model.addAttribute("Book", p);
-    model.addAttribute("categories", categoryService.getAllCategories());
-    return "Book/create";
-}
-
-
-
-    @PostMapping("/save")
-    public String saveBook(@Valid @ModelAttribute("Book") Book Book,
-                            BindingResult bindingResult,
-                            Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("categories", categoryService.getAllCategories());
-            return "Book/create";
-        }
-        BookService.saveBook(Book);
-        return "redirect:/Books";
-    }
-
-    @GetMapping("/edit/{id}")
-public String showEdit(@PathVariable int id, Model model) {
-    model.addAttribute("Book", BookService.getBookById(id));
-    model.addAttribute("categories", categoryService.getAllCategories());
-    return "Book/edit";
-}
-
-
-    @PostMapping("/edit")
-    public String update(@Valid @ModelAttribute Book Book,
-                        BindingResult bindingResult,
-                        @RequestParam(value = "imageBook", required = false) MultipartFile file,
-                        Model model) throws IOException {
+    public String create(@Valid @ModelAttribute("book") Book book,
+                         BindingResult bindingResult,
+                         @RequestParam(value = "imageBook", required = false) MultipartFile file,
+                         Model model) throws IOException {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
-            return "Book/edit";
+            return "book/create";
         }
-
-        Book existing = BookService.getBookById(Book.getId());
-
         if (file != null && !file.isEmpty()) {
-            File uploadFolder = new File("target/classes/static/images");
+            File uploadFolder = new File("src/main/resources/static/images");
             uploadFolder.mkdirs();
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             file.transferTo(new File(uploadFolder, fileName));
-            Book.setImage(fileName);
-        } else if (existing != null) {
-            Book.setImage(existing.getImage());
+            book.setImage(fileName);
         }
+        bookService.saveBook(book);
+        return "redirect:/books";
+    }
 
-        BookService.saveBook(Book);
-        return "redirect:/Books";
+    @GetMapping("/edit/{id}")
+    public String showEdit(@PathVariable int id, Model model) {
+        Book book = bookService.getBookById(id);
+        if (book == null) { return "redirect:/books"; }
+        if (book.getCategory() == null) { book.setCategory(new Category()); }
+        model.addAttribute("book", book);
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "book/edit";
+    }
+
+    @PostMapping("/edit")
+    public String update(@Valid @ModelAttribute("book") Book book,
+                         BindingResult bindingResult,
+                         @RequestParam(value = "imageBook", required = false) MultipartFile file,
+                         Model model) throws IOException {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "book/edit";
+        }
+        Book existing = bookService.getBookById(book.getId());
+        if (file != null && !file.isEmpty()) {
+            File uploadFolder = new File("src/main/resources/static/images");
+            uploadFolder.mkdirs();
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            file.transferTo(new File(uploadFolder, fileName));
+            book.setImage(fileName);
+        } else if (existing != null) {
+            book.setImage(existing.getImage());
+        }
+        bookService.saveBook(book);
+        return "redirect:/books";
     }
 
     @PostMapping("/delete/{id}")
     public String deleteBook(@PathVariable("id") Integer id) {
-        BookService.deleteBook(id);
-        return "redirect:/Books";
+        bookService.deleteBook(id);
+        return "redirect:/books";
     }
 }

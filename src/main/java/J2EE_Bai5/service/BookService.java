@@ -11,26 +11,11 @@ import java.util.List;
 @Service
 public class BookService {
     @Autowired
-    private BookRepository BookRepository;
-    @Autowired
+    private BookRepository bookRepository;
 
-    public List<Book> getAllBooks() {
-        return BookRepository.findAll();
-    }
-
-    public void saveBook(Book Book) {
-        BookRepository.save(Book);
-    }
-
-    public Book getBookById(int id) {
-        return BookRepository.findById(id).orElse(null);
-    }
-
-    public Book updateBook(Book Book) {
-        return BookRepository.save(Book);
-    }
-
-    public void deleteBook(int id) {
-        BookRepository.deleteById(id);
-    }
+    public List<Book> getAllBooks() { return bookRepository.findAll(); }
+    public void saveBook(Book book) { bookRepository.save(book); }
+    public Book getBookById(int id) { return bookRepository.findById(id).orElse(null); }
+    public Book updateBook(Book book) { return bookRepository.save(book); }
+    public void deleteBook(int id) { bookRepository.deleteById(id); }
 }
