@@ -33,20 +33,30 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute Product product, 
-                        @RequestParam("imageProduct") MultipartFile file) throws IOException {
-        if (!file.isEmpty()) {
-            File uploadFolder = new File("target/classes/static/images");
-            uploadFolder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            file.transferTo(new File(uploadFolder, fileName));
-            product.setImage(fileName);
-        }
-        productService.saveProduct(product);
-        return "redirect:/products";
+public String create(@Valid @ModelAttribute("product") Product product,
+                     BindingResult bindingResult,
+                     @RequestParam(value = "imageProduct", required = false) MultipartFile file,
+                     Model model) throws IOException {
+
+    if (bindingResult.hasErrors()) {
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "product/create";
     }
 
-    @GetMapping("/create")
+    if (file != null && !file.isEmpty()) {
+        File uploadFolder = new File("src/main/resources/static/images");
+        uploadFolder.mkdirs();
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        file.transferTo(new File(uploadFolder, fileName));
+        product.setImage(fileName);
+    }
+
+    productService.saveProduct(product);
+    return "redirect:/products";
+}
+
+
+@GetMapping("/create")
 public String showCreateForm(Model model) {
     Product p = new Product();
     p.setCategory(new Category());
@@ -54,6 +64,7 @@ public String showCreateForm(Model model) {
     model.addAttribute("categories", categoryService.getAllCategories());
     return "product/create";
 }
+
 
 
     @PostMapping("/save")
