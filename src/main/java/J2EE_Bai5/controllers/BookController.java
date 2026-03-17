@@ -1,6 +1,7 @@
 package J2EE_Bai5.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.BindingResult;
@@ -8,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.ui.Model;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import J2EE_Bai5.models.*;
@@ -41,11 +43,22 @@ public class BookController {
         return "book/create";
     }
 
+     @Value("${app.upload.dir:#{null}}")
+    private String configuredUploadDir;
+
+    private java.nio.file.Path getProjectImagesPath() {
+        if (configuredUploadDir != null && !configuredUploadDir.isBlank()) {
+            return Paths.get(configuredUploadDir).toAbsolutePath();
+        }
+        String userDir = System.getProperty("user.dir");
+        return Paths.get(userDir, "src", "main", "resources", "static", "images").toAbsolutePath();
+    }
+
     @PostMapping("/create")
     public String create(@Valid @ModelAttribute("book") Book book,
-                        BindingResult bindingResult,
-                        @RequestParam(value = "imageBook", required = false) MultipartFile file,
-                        Model model) {
+                         BindingResult bindingResult,
+                         @RequestParam(value = "imageBook", required = false) MultipartFile file,
+                         Model model) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
@@ -54,21 +67,17 @@ public class BookController {
 
         if (file != null && !file.isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename().replaceAll("\\s+", "_");
+            java.nio.file.Path imagesPath = getProjectImagesPath();
+            File folder = imagesPath.toFile();
+            if (!folder.exists() && !folder.mkdirs()) {
+                model.addAttribute("uploadError", "Could not create upload directory: " + imagesPath);
+                model.addAttribute("categories", categoryService.getAllCategories());
+                return "book/create";
+            }
+            File dest = imagesPath.resolve(fileName).toFile();
             try {
-                File devFolder = new File("src/main/resources/static/images");
-                devFolder.mkdirs();
-                File devDest = new File(devFolder, fileName);
-                file.transferTo(devDest);
-
-                File targetFolder = new File("target/classes/static/images");
-                targetFolder.mkdirs();
-                File targetDest = new File(targetFolder, fileName);
-                if (!devDest.getAbsolutePath().equals(targetDest.getAbsolutePath())) {
-                    java.nio.file.Files.copy(devDest.toPath(), targetDest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                }
-
+                file.transferTo(dest);
                 book.setImage(fileName);
-                System.out.println("Saved file to: " + devDest.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
                 model.addAttribute("uploadError", "Failed to save image: " + e.getMessage());
@@ -76,30 +85,7 @@ public class BookController {
                 return "book/create";
             }
         }
-
-        if (book.getCategory() != null) {
-            int catId = book.getCategory().getId();
-            if (catId > 0) {
-                Category managed = categoryService.getCategoryById(catId);
-                if (managed == null) {
-                    model.addAttribute("categories", categoryService.getAllCategories());
-                    model.addAttribute("uploadError", "Selected category not found.");
-                    return "book/create";
-                }
-                book.setCategory(managed);
-            } else {
-                model.addAttribute("categories", categoryService.getAllCategories());
-                model.addAttribute("uploadError", "Please select a category.");
-                return "book/create";
-            }
-        } else {
-            model.addAttribute("categories", categoryService.getAllCategories());
-            model.addAttribute("uploadError", "Please select a category.");
-            return "book/create";
-        }
-
-        Book saved = bookService.saveBook(book);
-        System.out.println("Saved entity: id=" + saved.getId() + " image=" + saved.getImage());
+        bookService.saveBook(book);
         return "redirect:/books";
     }
 
@@ -119,8 +105,9 @@ public class BookController {
                          @RequestParam(value = "imageBook", required = false) MultipartFile file,
                          Model model) throws IOException {
         if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(err -> System.out.println(err));
             model.addAttribute("categories", categoryService.getAllCategories());
-            return "book/edit";
+            return "book/create";
         }
         Book existing = bookService.getBookById(book.getId());
         if (file != null && !file.isEmpty()) {
