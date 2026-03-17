@@ -3,14 +3,16 @@ package J2EE_Bai5.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.ui.Model;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
 import J2EE_Bai5.models.*;
 import J2EE_Bai5.service.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 @Controller
@@ -41,11 +43,24 @@ public class ProductController {
             product.setImage(fileName);
         }
         productService.saveProduct(product);
-        return "redirect:/product";
+        return "redirect:/products";
+    }
+
+    @GetMapping("/create")
+        public String showCreateForm(Model model) {
+        model.addAttribute("product", new Product());
+        model.addAttribute("categories", categoryService.getAllCategories());
+        return "product/create";
     }
 
     @PostMapping("/save")
-    public String saveProduct(@ModelAttribute("product") Product product) {
+    public String saveProduct(@Valid @ModelAttribute("product") Product product,
+                            BindingResult bindingResult,
+                            Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "product/create";
+        }
         productService.saveProduct(product);
         return "redirect:/products";
     }
@@ -57,26 +72,33 @@ public class ProductController {
     }
 
     @PostMapping("/edit")
-    public String update(@ModelAttribute Product product, 
-                        @RequestParam("imageProduct") MultipartFile file) throws IOException {
-        
+    public String update(@Valid @ModelAttribute Product product,
+                        BindingResult bindingResult,
+                        @RequestParam(value = "imageProduct", required = false) MultipartFile file,
+                        Model model) throws IOException {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "product/edit";
+        }
+
         Product existing = productService.getProductById(product.getId());
-        
-        if (!file.isEmpty()) {
+
+        if (file != null && !file.isEmpty()) {
             File uploadFolder = new File("target/classes/static/images");
             uploadFolder.mkdirs();
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             file.transferTo(new File(uploadFolder, fileName));
             product.setImage(fileName);
-        } else {
+        } else if (existing != null) {
             product.setImage(existing.getImage());
         }
-        
+
         productService.saveProduct(product);
-        return "redirect:/product";
+        return "redirect:/products";
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String deleteProduct(@PathVariable("id") Integer id) {
         productService.deleteProduct(id);
         return "redirect:/products";

@@ -32,9 +32,7 @@
                 <td th:text="${product.price}"></td>
                 <td th:text="${product.category != null} ? ${product.category.name} : ''"></td>
                 <td>
-                    <form th:action="@{/products/edit/{id}(id=${product.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-secondary btn-sm">Edit</button>
-                    </form>
+                    <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-secondary btn-sm">Edit</a>
                     <form th:action="@{/products/delete/{id}(id=${product.id})}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
