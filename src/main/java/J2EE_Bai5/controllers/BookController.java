@@ -43,22 +43,63 @@ public class BookController {
 
     @PostMapping("/create")
     public String create(@Valid @ModelAttribute("book") Book book,
-                         BindingResult bindingResult,
-                         @RequestParam(value = "imageBook", required = false) MultipartFile file,
-                         Model model) throws IOException {
+                        BindingResult bindingResult,
+                        @RequestParam(value = "imageBook", required = false) MultipartFile file,
+                        Model model) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
             return "book/create";
         }
+
         if (file != null && !file.isEmpty()) {
-            File uploadFolder = new File("src/main/resources/static/images");
-            uploadFolder.mkdirs();
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            file.transferTo(new File(uploadFolder, fileName));
-            book.setImage(fileName);
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename().replaceAll("\\s+", "_");
+            try {
+                File devFolder = new File("src/main/resources/static/images");
+                devFolder.mkdirs();
+                File devDest = new File(devFolder, fileName);
+                file.transferTo(devDest);
+
+                File targetFolder = new File("target/classes/static/images");
+                targetFolder.mkdirs();
+                File targetDest = new File(targetFolder, fileName);
+                if (!devDest.getAbsolutePath().equals(targetDest.getAbsolutePath())) {
+                    java.nio.file.Files.copy(devDest.toPath(), targetDest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+
+                book.setImage(fileName);
+                System.out.println("Saved file to: " + devDest.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+                model.addAttribute("uploadError", "Failed to save image: " + e.getMessage());
+                model.addAttribute("categories", categoryService.getAllCategories());
+                return "book/create";
+            }
         }
-        bookService.saveBook(book);
+
+        if (book.getCategory() != null) {
+            int catId = book.getCategory().getId();
+            if (catId > 0) {
+                Category managed = categoryService.getCategoryById(catId);
+                if (managed == null) {
+                    model.addAttribute("categories", categoryService.getAllCategories());
+                    model.addAttribute("uploadError", "Selected category not found.");
+                    return "book/create";
+                }
+                book.setCategory(managed);
+            } else {
+                model.addAttribute("categories", categoryService.getAllCategories());
+                model.addAttribute("uploadError", "Please select a category.");
+                return "book/create";
+            }
+        } else {
+            model.addAttribute("categories", categoryService.getAllCategories());
+            model.addAttribute("uploadError", "Please select a category.");
+            return "book/create";
+        }
+
+        Book saved = bookService.saveBook(book);
+        System.out.println("Saved entity: id=" + saved.getId() + " image=" + saved.getImage());
         return "redirect:/books";
     }
 

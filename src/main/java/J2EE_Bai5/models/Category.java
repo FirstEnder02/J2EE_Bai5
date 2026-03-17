@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @NotBlank(message = "Tên danh mục không được để trống")
     @Column(nullable = false, length = 255)
