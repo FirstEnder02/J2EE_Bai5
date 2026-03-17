@@ -16,31 +16,31 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 @Controller
-@RequestMapping("/products")
-public class ProductController {
+@RequestMapping("/Books")
+public class BookController {
 
     @Autowired
-    private ProductService productService;
+    private BookService BookService;
 
     @Autowired
     private CategoryService categoryService;
 
     @GetMapping
-    public String listProducts(Model model) {
-        List<Product> productList = productService.getAllProducts();
-        model.addAttribute("products", productList);
-        return "product/product";
+    public String listBooks(Model model) {
+        List<Book> BookList = BookService.getAllBooks();
+        model.addAttribute("Books", BookList);
+        return "Book/Book";
     }
 
     @PostMapping("/create")
-public String create(@Valid @ModelAttribute("product") Product product,
+public String create(@Valid @ModelAttribute("Book") Book Book,
                      BindingResult bindingResult,
-                     @RequestParam(value = "imageProduct", required = false) MultipartFile file,
+                     @RequestParam(value = "imageBook", required = false) MultipartFile file,
                      Model model) throws IOException {
 
     if (bindingResult.hasErrors()) {
         model.addAttribute("categories", categoryService.getAllCategories());
-        return "product/create";
+        return "Book/create";
     }
 
     if (file != null && !file.isEmpty()) {
@@ -48,75 +48,75 @@ public String create(@Valid @ModelAttribute("product") Product product,
         uploadFolder.mkdirs();
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         file.transferTo(new File(uploadFolder, fileName));
-        product.setImage(fileName);
+        Book.setImage(fileName);
     }
 
-    productService.saveProduct(product);
-    return "redirect:/products";
+    BookService.saveBook(Book);
+    return "redirect:/Books";
 }
 
 
 @GetMapping("/create")
 public String showCreateForm(Model model) {
-    Product p = new Product();
+    Book p = new Book();
     p.setCategory(new Category());
-    model.addAttribute("product", p);
+    model.addAttribute("Book", p);
     model.addAttribute("categories", categoryService.getAllCategories());
-    return "product/create";
+    return "Book/create";
 }
 
 
 
     @PostMapping("/save")
-    public String saveProduct(@Valid @ModelAttribute("product") Product product,
+    public String saveBook(@Valid @ModelAttribute("Book") Book Book,
                             BindingResult bindingResult,
                             Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
-            return "product/create";
+            return "Book/create";
         }
-        productService.saveProduct(product);
-        return "redirect:/products";
+        BookService.saveBook(Book);
+        return "redirect:/Books";
     }
 
     @GetMapping("/edit/{id}")
 public String showEdit(@PathVariable int id, Model model) {
-    model.addAttribute("product", productService.getProductById(id));
+    model.addAttribute("Book", BookService.getBookById(id));
     model.addAttribute("categories", categoryService.getAllCategories());
-    return "product/edit";
+    return "Book/edit";
 }
 
 
     @PostMapping("/edit")
-    public String update(@Valid @ModelAttribute Product product,
+    public String update(@Valid @ModelAttribute Book Book,
                         BindingResult bindingResult,
-                        @RequestParam(value = "imageProduct", required = false) MultipartFile file,
+                        @RequestParam(value = "imageBook", required = false) MultipartFile file,
                         Model model) throws IOException {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.getAllCategories());
-            return "product/edit";
+            return "Book/edit";
         }
 
-        Product existing = productService.getProductById(product.getId());
+        Book existing = BookService.getBookById(Book.getId());
 
         if (file != null && !file.isEmpty()) {
             File uploadFolder = new File("target/classes/static/images");
             uploadFolder.mkdirs();
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             file.transferTo(new File(uploadFolder, fileName));
-            product.setImage(fileName);
+            Book.setImage(fileName);
         } else if (existing != null) {
-            product.setImage(existing.getImage());
+            Book.setImage(existing.getImage());
         }
 
-        productService.saveProduct(product);
-        return "redirect:/products";
+        BookService.saveBook(Book);
+        return "redirect:/Books";
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable("id") Integer id) {
-        productService.deleteProduct(id);
-        return "redirect:/products";
+    public String deleteBook(@PathVariable("id") Integer id) {
+        BookService.deleteBook(id);
+        return "redirect:/Books";
     }
 }

@@ -9,17 +9,17 @@ import org.hibernate.validator.constraints.Length;
 
 @Data
 @Entity
-public class Product {
+public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank(message = "Tên sản phẩm không được để trống")
+    @NotBlank(message = "Tên sách không được để trống")
     @Column(nullable = false, length = 255)
     private String name;
 
-    @NotNull(message = "Giá sản phẩm không được để trống")
-    @PositiveOrZero(message = "Giá sản phẩm phải lớn hơn hoặc bằng 0")
+    @NotNull(message = "Giá sách không được để trống")
+    @PositiveOrZero(message = "Giá sách phải lớn hơn hoặc bằng 0")
     @Column(nullable = false)
     private Long price;
 
